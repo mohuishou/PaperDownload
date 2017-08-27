@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=10" />
+    <meta name="viewport" content="width=device-width" />
+    <title>出版物检索</title>
+    <link href="/knavi/Content/site?v=yz8j_AXPz-A2JB1q0XzvymzMxgkiw5fxcqZ9abYe9Fs1" rel="stylesheet"/>
+
+    <script src="/knavi/bundles/jquery?v=xSzNxz5frNthvf-Gkuan85sR8Zq5nVyqciS0pCLcfL01"></script>
+
+    <script type="text/javascript" src="http://login.cnki.net/TopLogin/api/loginapi/get?type=top&returnurl=http%3a%2f%2fnavi.cnki.net%2fKNavi%2f&localCSS="></script>
+    
+
+    </script>
+    <script type="text/javascript">
+        var scheme = 'http';
+        var host = 'navi.cnki.net';
+        var AppPath = '/knavi'; 
+        document.domain = "cnki.net";
+    </script>
+    <script for="cajax" event="OpenUrlCompleted()" language="javascript">
+        InitPage();
+    </script>
+</head>
+<body>
+    
+    <!-- headbox start -->
+    <div class="headbox">
+        <!-- searchbox start -->
+        <div class="searchbox">
+            <!-- searchmain start -->
+            <div class="searchmain">
+                <a href="http://www.cnki.net">
+                    <div class="tlogo"></div>
+                </a>
+                <!-- research start -->
+                <div class="research">
+                    <!-- searchBar start -->
+                    <div class="searchBar">
+                        <div class="searchbar_default">
+                            <span>出版来源导航</span><i class="searchbar_icon"></i>
+                        </div>
+                        <ul class="searchbar_list" id="searchbar_list">
+                            <li class="on" navitype="All" productcode="SCDB"><a href="#" onclick="naviswitch.Switch('All')">出版来源导航</a></li>
+                            <li navitype="Journal" productcode="CJFD"><a href="#" onclick="naviswitch.Switch('Journal')">期刊导航</a></li>
+                            <li navitype="JJournal" productcode="CCJD"><a href="#" onclick="naviswitch.Switch('JJournal')">学术辑刊导航</a></li>
+                            <li navitype="PPaper" productcode="CDMD"><a href="#" onclick="naviswitch.Switch('PPaper')">学位授予单位导航</a></li>
+                            <li navitype="DPaper" productcode="CIPD,CPFD,IPFD,CPVD"><a href="#" onclick="naviswitch.Switch('DPaper','1')">会议导航</a></li>
+                            <li navitype="NPaper" productcode="CCND"><a href="#" onclick="naviswitch.Switch('NPaper')">报纸导航</a></li>
+                            <li navitype="Yearbook" productcode="CYFD"><a href="#" onclick="naviswitch.Switch('Yearbook')">年鉴导航</a></li>
+                            <li navitype="Refbook" productcode="CRFD"><a href="#" onclick="naviswitch.Switch('Refbook')">工具书导航</a></li>
+                        </ul>
+                    </div>
+                    <!-- searchBar end -->
+                    <!-- search-inputbg start -->
+                    <div class="search-inputbg">
+                        <div id="hyhtml" style="display: none;"></div>
+                        <span class="reopt" id="hydropdown">
+                            <select id="txt_1_sel" name="txt_1_sel" class="searchw8">
+                                <option selected="selected">来源名称</option>
+                                <option>主办单位</option>
+                                <option>出版者</option>
+                                <option>ISSN</option>
+                                <option>CN</option>
+                                <option>ISBN</option>
+                            </select>
+                        </span>
+                        <input class="rekeyword" placeholder="请输入检索词" id="txt_1_value1" name="txt_1_value1" maxlength="100" type="text" />
+                        <input type="button" id="btnSearch" class="researchbtn" value="出版来源检索" onclick="Submit.search();" />
+                    </div>
+                    <!-- search-inputbg end -->
+
+                </div>
+                <!-- research end -->
+                <!-- wxjs start -->
+                <div class="wxjs"><a id="filesearch" href="#" target="_blank">文献检索</a><img src="/knavi/images/jticon.jpg"></div>
+                <!-- wxjs end -->
+            </div>
+            <!-- searchmain end -->
+        </div>
+        <!-- searchbox end -->
+    </div>
+    <!-- headbox end-->
+
+    
+<link href="/knavi/Content/navi/home?v=rwfs6tL3_Vdp3sxYgMyZyRY0uMb_lTuRMU2obT2oLtU1" rel="stylesheet"/>
+
+
+<div class="bodybox" id="main">
+    <!-- bodybox start -->
+    <div class="bodybox">
+        <!-- location start -->
+        <div class="location">
+            <a href="#">出版来源导航</a>
+        </div>
+        <!-- location end -->
+
+        <!-- bodymain start -->
+        <div class="bodymain">
+            <div class="nav fl" id="leftnavi">
+            </div>
+            <div class="docs fr" id="rightnavi">
+                <!--sort indexBasic-->
+            </div>
+            <!--docs-->
+        </div>
+        <!-- bodymain end -->
+
+    </div>
+    <!-- bodybox end-->
+</div>
+<script>
+    $(document).ready(function () {
+        var reg = new RegExp( AppPath + "/([a-zA-Z]+).html", "i");
+        var type = 'All';
+        var search = $.GetQueryString("search");
+        var selectindex = $.GetQueryString("selectindex");
+        var huiyinum = $.GetQueryString("huiyinum");
+        var date = $.GetQueryString("date");
+        var productcode = $.GetQueryString("productcode") ? $.GetQueryString("productcode").toUpperCase() : "";
+
+        if (!reg.test(window.location.pathname)) {
+            $.listSort('.searchBar', '.searchbar_default', 'on', type, true);
+            if (search || date) {
+                naviswitch.SwitchDefault(type);
+                Submit.search();
+            }
+            else
+                naviswitch.Switch('All');
+        }
+        else {
+            type = '';
+            type = $.URLStandard(type);
+            if (!huiyinum) {
+                if (type == "DPaper" && selectindex) {
+                    var index = 0;
+                    $.each(BindData["DPaperIndex"], function (i) {
+                        if (index.toString() == selectindex) {
+                            huiyinum = BindData["DPaperIndex"][i];
+                            return false;
+                        }
+                        index++;
+                    });
+                }
+                else if (type == "DPaper1") {
+                    type = "DPaper";
+                    huiyinum = 1;
+                }
+
+            }
+            /*头部检索菜单导航,显示时需隐藏掉下拉框，否则会有闪烁的问题,第四个参数是否隐藏头部导航下面的下拉框*/
+            $.listSort('.searchBar', '.searchbar_default', 'on', type, true);
+            if (productcode) {
+                naviswitch.SwitchDefault(type, huiyinum, '', '', productcode);
+                Submit.tabTurn();
+            }
+            else if (search || date) {
+                naviswitch.SwitchDefault(type, huiyinum);
+                Submit.search(type);
+            }
+            else
+                naviswitch.Switch(type, huiyinum);
+            $("#searchbar_list li").removeClass();
+            $("#searchbar_list li[navitype='" + type + "']").addClass("on");
+        }
+    })
+
+</script>
+
+
+    <div id="footer">
+        <div class="botNav clearfix">
+            <a target="_blank" href="http://cnki.net/gycnki/gycnki.htm">关于我们</a>
+            <a target="_blank" href="http://www.cnki.net/other/gonggao/gongsirongyu.html">CNKI荣誉</a>
+            <a target="_blank" href="http://www.cnki.net/other/gonggao/bqsm.htm">版权公告</a>
+            <a target="_blank" href="http://service.cnki.net/">客服中心</a>
+            <a target="_blank" href="http://help.cnki.net/">在线咨询</a>
+            <a target="_blank" href="http://help.cnki.net/Live800_1_2.aspx?GroupID=503&amp;PageID=101008&amp;Name=&amp;CookieName=TTKN_OnLine_800">用户建议</a>
+            <a target="_blank" href="http://www.cnki.net/other/zhaopin/zhaopin.html">知网招聘</a>
+        </div>
+        <div id="bottom">
+            <div class="botbox">
+                <div class="leftinside">
+                    <ul>
+                        <li style="width: 130px;">
+                            <b>读者服务</b>
+                            <p>
+                                <a target="_blank" href="http://vipcard.cnki.net/ec/skwd/skwd.htm">购买知网卡</a>
+                                <br>
+                                <a target="_blank" href="http://my.cnki.net/CNKIRecharging/czzx.html">充值中心</a>
+                                <br>
+                                <a target="_blank" href="http://my.cnki.net/">我的CNKI</a>
+                                <br>
+                                <a target="_blank" href="http://service.cnki.net/helpcenter/">帮助中心</a>
+                            </p>
+                        </li>
+                        <li style="width: 185px;">
+                            <b>CNKI常用软件下载</b>
+                            <p>
+                                <a target="_blank" href="http://cajviewer.cnki.net">CAJViewer浏览器</a>
+                                <br>
+                                <a target="_blank" href="http://www.cnki.net/software/xzydq.htm#CNKIe-Learning">CNKI数字化学习平台</a>
+                                <br>
+                                <a target="_blank" href="http://mall.cnki.net/Reference/Soft/CNKI工具书.rar">工具书桌面检索软件</a>
+                            </p>
+                        </li>
+                        <li style="width: 145px;">
+                            <b>特色服务</b>
+                            <p>
+                                <a target="_blank" href="http://wap.cnki.net/">手机知网</a>
+                                <br>
+                                <a target="_blank" href="http://wuxizazhi.cnki.net/">杂志订阅</a>
+                                <br>
+                                <a target="_blank" href="http://mall.cnki.net/">数字出版物订阅</a>
+                                <br>
+                                <a target="_blank" href="http://ad.cnki.net/index.aspx">广告服务</a>
+                            </p>
+                        </li>
+                        <li style="width: 155px;">
+                            <b>客服咨询</b>
+                            <p>
+                                订卡热线：400-819-9993<br>
+                                服务热线：400-810-9888<br>
+                                在线咨询：<a target="_blank" href="http://help.cnki.net">help.cnki.net</a><br>
+                                邮件咨询：<a target="_blank" href="mailto:help@cnki.net">help@cnki.net</a> <br>客服微博：<a target="_blank" href="http://e.weibo.com/u/3059308095">
+                                    <img style="width: 16px; height: 16px; vertical-align: middle;" title="客服新浪微博" src="/knavi/images/logo_xl.gif">
+                                </a><a target="_blank" href="http://t.qq.com/CNKI_kefu" style="margin-left: 5px;">
+                                    <img style="width: 16px; height: 16px; vertical-align: middle;" title="客服腾讯微博" src="/knavi/images/logo_tx.gif">
+                                </a>
+                            </p>
+                        </li>
+                    </ul>
+                </div>
+                <div class="rigfooter">
+                    <img src="http://piccache.cnki.net/index/images/gb/footlogo.png" alt="" width="230" height="28">
+                    <br>
+                    京ICP证040431号 <a target="_blank" href="http://www.cnki.net/images/006.jpg">互联网出版许可证 新出网证(京)字008号</a>
+                    <br>
+                    <a target="_blank" href="http://www.hd315.gov.cn/beian/view.asp?bianhao=010202005012100021">经营性网站备案信息</a> 京公网安备11010802014875号
+                <br>
+                    © 2014中国知网(CNKI)<br>
+                    《中国学术期刊(光盘版)》电子杂志社有限公司
+                <br>
+                    KDN平台基础技术由KBASE 10.0提供.<br>
+                    <!--可信网站图片LOGO安装开始-->
+                    <a id="___szfw_logo___" href="https://ss.knet.cn/verifyseal.dll?sn=e13111111010043364isll000000&amp;a=1&amp;pa=0.08881110103584755" target="_blank">
+                        <img alt="可信网站" src="/knavi/images/kxwz.jpg" width="86" height="33">
+                    </a>
+                    <!--可信网站图片LOGO安装结束-->
+                    <!--诚信网站图片LOGO安装开始-->
+                    <a id="A1" href="https://search.szfw.org/cert/l/CX20140929005220005306" target="_blank" style="margin-left: 10px;">
+                        <img alt="诚信网站" src="/knavi/images/cert.jpg" width="86" height="33">
+                    </a>
+                    <script type="text/javascript">(function () { document.getElementById('___szfw_logo___').oncontextmenu = function () { return false; } })();</script>
+                    <!--诚信网站图片LOGO安装结束-->
+                </div>
+                <div class="clear"></div>
+            </div>
+        </div>
+        <!--bottom-->
+    </div>
+    <script src="/knavi/bundles/template?v=3GJRfF23nLnjknrwUTSV6Zi9TuX_NR-eDd0fbr2a20w1"></script>
+
+    <script type="text/javascript">
+        $(function () {
+            $(".backToTop").goToTop();
+            $(window).bind('scroll resize', function () {
+                $(".backToTop").goToTop();
+            });
+
+        });
+
+        //构造统一登录
+        FlushLogin();
+        $(".ecp_top-nav").css({
+            "border-top": "none"
+        });
+        $(".ecp_tn-header").css({
+            "width": "1200px"
+        });
+
+        //构造统一登录 结束
+    </script>
+
+    <script>
+        function LoginSucess(data) {
+            var param = { uid: data.Uid, username: "", password: "" }
+            $("#useridfromdata").val(data.Uid);
+
+            ajaxSubmit.Submit(AppPath + "/Rights/LogIn", param, function (data) {
+                window.location.reload();
+
+            })
+        }
+
+        function Ecp_LogoutOptr(data) {
+            var param = {}
+            $("#useridfromdata").val("");
+
+            var kurl = "http://" + host + "/Kdoc/logOut.aspx";
+            ajaxSubmit.Submit(kurl, param, function (data) {
+            });
+
+            ajaxSubmit.Submit(AppPath + "/Rights/LogOut", param, function (data) {
+                window.location.reload();
+            })
+        }
+
+
+    </script>
+</body>
+</html>

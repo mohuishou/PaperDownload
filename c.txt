@@ -1,0 +1,18 @@
+HTTP/1.1 302 Found
+Cache-Control: private
+Content-Type: text/html; charset=utf-8
+Location: /kns/default.aspx
+Server: Microsoft-IIS/7.5
+Set-Cookie: ASP.NET_SessionId=15ly1otn4caikqpn3gw5bu44; path=/; HttpOnly
+X-AspNet-Version: 4.0.30319
+Set-Cookie: ASP.NET_SessionId=15ly1otn4caikqpn3gw5bu44; path=/; HttpOnly
+Set-Cookie: c_m_LinID=LinID=WEEvREcwSlJHSldRa1FhcTdWZDluTlhXVk92R1k1bmg1c2tkVnprcjk4cz0=$9A4hF_YAuvQ5obgVAqNKPCYcEjKensW4ggI8Fm4gTkoUKaID8j8gFw!!&ot=08/19/2017 21:28:53; domain=cnki.net; expires=Sat, 19-Aug-2017 13:28:53 GMT; path=/; HttpOnly
+Set-Cookie: LID=WEEvREcwSlJHSldRa1FhcTdWZDluTlhXVk92R1k1bmg1c2tkVnprcjk4cz0=$9A4hF_YAuvQ5obgVAqNKPCYcEjKensW4ggI8Fm4gTkoUKaID8j8gFw!!; domain=cnki.net; path=/
+Set-Cookie: c_m_expire=2017-08-19 21:28:53; domain=cnki.net; expires=Sat, 19-Aug-2017 13:28:53 GMT; path=/
+Set-Cookie: Ecp_LoginStuts={"IsAutoLogin":false,"UserName":"","ShowName":"","UserType":"bk","r":"Ms5Lxr"}; domain=cnki.net; expires=Sat, 19-Aug-2017 13:28:53 GMT; path=/
+Set-Cookie: LID=WEEvREcwSlJHSldRa1FhcTdWZDluTlhXVk92R1k1bmg1c2tkVnprcjk4cz0=$9A4hF_YAuvQ5obgVAqNKPCYcEjKensW4ggI8Fm4gTkoUKaID8j8gFw!!; domain=cnki.net; path=/
+X-Powered-By: ASP.NET
+Date: Sat, 19 Aug 2017 13:08:53 GMT
+Connection: close
+Content-Length: 134
+

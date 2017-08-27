@@ -1,0 +1,39 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+        <meta http-equiv="Content-Type" content="text/html; charset=gb2312" />
+        <title>中国知网</title>
+</head>
+        <body>
+                加载中，请稍等……
+                <script>/*alert("下载的时候遇到“当前用户并发数已满！“，请多点几次下载按钮试试。");*/</script>
+                <form method="post" action="" name="loginform">
+                        <table border="0">
+                                <tbody>
+                                        <tr>
+                                                <td>
+                                                        <input type="hidden" name="username" id="username"/>
+                                                        <input type="hidden" name="password" id="password" value="shjdts" />
+                                                </td>
+                                        </tr>
+                                </tbody>
+                        </table>
+                </form>
+                <script>
+                        var     myhost="http://epub.cnki.net/kns";
+                        setTimeout(()=>{
+                            autosubmit(document.loginform);
+                        },5000)
+                        
+                        function autosubmit(obj){
+                                var user = obj.username.value;
+                                var pass = obj.password.value;
+
+                                document.getElementById("username").value = "sh0130";
+
+                                obj.action = myhost + "/loginid.aspx?p=default.aspx";
+                                obj.submit();
+                        }
+                </script>
+        </body>
+</html>
