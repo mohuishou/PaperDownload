@@ -1,11 +1,14 @@
 package cnki
 
 import (
-	"fmt"
 	"testing"
 )
 
 func TestSearch(t *testing.T) {
 	c := NewCnki()
-	fmt.Println(c.Search("", "", "电化教育研究"))
+	c.Login("sh0130", "shjdts")
+	res := c.Search("", "", "电化教育研究")
+	for _, v := range res {
+		c.Download(v.DownloadURL, "/home/lxl/Downloads/test", v.Title)
+	}
 }

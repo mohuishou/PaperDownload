@@ -1,14 +1,18 @@
 package cnki
 
 import (
+	"fmt"
+	"io"
 	"io/ioutil"
 	"math"
 	"math/rand"
 	"net/http"
 	"net/http/cookiejar"
 	"net/url"
+	"os"
 	"strconv"
 	"strings"
+	"time"
 
 	goquery "github.com/PuerkitoBio/goquery.git"
 	"github.com/mohuishou/PaperDownload/spider"
@@ -161,6 +165,18 @@ func (c *Cnki) getSearchResult() []SearchResult {
 	if err != nil {
 		panic(err)
 	}
+	//获取总页数
+	text := doc.Find(".countPageMark").Text()
+	tmp := strings.Split(text, "/")
+	if len(tmp) < 1 {
+		panic("总页数获取失败！")
+	}
+	c.searchOption.allPage, err = strconv.Atoi(tmp[1])
+	if err != nil {
+		panic(err)
+	}
+
+	//获取结果
 	searchLists := make([]SearchResult, 0)
 	doc.Find("table.GridTableContent tbody tr").Each(func(i int, s *goquery.Selection) {
 		url, ok := s.Find("a.briefDl_D").Attr("href")
@@ -182,15 +198,19 @@ func (c *Cnki) getSearchResult() []SearchResult {
 	return searchLists
 }
 
+//SearchResultOrder 指定排序方式
 func (c *Cnki) SearchResultOrder() []SearchResult {
 	return c.getSearchResult()
 }
 
+//SearchPage 搜索结果：指定页码
+//@param page int 页码
 func (c *Cnki) SearchPage(page int) []SearchResult {
 	c.searchOption.currentPage = page
 	return c.getSearchResult()
 }
 
+//SearchNext 搜索结果：下一页
 func (c *Cnki) SearchNext() []SearchResult {
 	if c.searchOption.currentPage < c.searchOption.allPage {
 		c.searchOption.currentPage++
@@ -198,11 +218,66 @@ func (c *Cnki) SearchNext() []SearchResult {
 	return c.getSearchResult()
 }
 
+//SearchPrev 搜索结果：前一页
 func (c *Cnki) SearchPrev() []SearchResult {
 	if c.searchOption.currentPage > 1 {
 		c.searchOption.currentPage--
 	}
 	return c.getSearchResult()
+}
+
+//Download 下载
+func (c *Cnki) Download(url, dir, filename string) {
+	for i := 0; i < 5; i++ {
+		time.Sleep(2 * time.Second)
+
+		resp, err := c.Get(url)
+
+		if err != nil {
+			fmt.Println(err)
+			continue
+		}
+		for k, v := range resp.Header {
+			fmt.Println(k, ":", v)
+		}
+		if i == 0 {
+			defer resp.Body.Close()
+		}
+
+		if resp.Header.Get("Content-Type") == "application/pdf" || resp.Header.Get("Content-Type") == "application/caj" {
+			if resp.Header.Get("Content-Type") == "application/pdf" {
+				filename += ".pdf"
+			}
+			if ok, _ := pathExists(dir); !ok {
+				os.MkdirAll(dir, os.ModePerm)
+			}
+			var f *os.File
+			if ok, _ := pathExists(dir + "/" + filename); !ok {
+				f, err = os.Create(dir + "/" + filename)
+			} else {
+				f, err = os.OpenFile(dir+"/"+filename, os.O_APPEND, 0666)
+			}
+			if err != nil {
+				panic("文件打开或新建失败！" + err.Error())
+			}
+			io.Copy(f, resp.Body)
+			break
+		} else {
+			b, _ := ioutil.ReadAll(resp.Body)
+			fmt.Println(string(b))
+		}
+	}
+}
+
+func pathExists(path string) (bool, error) {
+	_, err := os.Stat(path)
+	if err == nil {
+		return true, nil
+	}
+	if os.IsNotExist(err) {
+		return false, nil
+	}
+	return false, err
 }
 
 //新建一个guid，按照知网js实现方式重现
