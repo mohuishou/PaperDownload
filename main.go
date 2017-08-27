@@ -4,13 +4,10 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
-	"math"
-	"math/rand"
 	"net/http"
 	"net/http/cookiejar"
 	"net/url"
 	"os"
-	"strconv"
 	"strings"
 	"time"
 
@@ -121,43 +118,10 @@ func main() {
 	doc.Find("a.briefDl_D").Each(func(i int, s *goquery.Selection) {
 		a, b := s.Attr("href")
 		if b {
-			st = "http://kns.cnki.net/kns/brief/" + a +"&dflag=pdfdown"
+			st = "http://kns.cnki.net/kns/brief/" + a + "&dflag=pdfdown"
 			fmt.Println(a)
 		}
 	})
-	// return
-	// u, err := url.Parse("http://cnki.net")
-	// if err != nil {
-	// 	panic(err)
-	// }
-	// uid := ""
-	// co := jar.Cookies(u)
-	// for _, v := range co {
-	// 	if v.Name == "LID" {
-	// 		uid = v.Value
-	// 	}
-	// }
-	// u, err = url.Parse("http://navi.cnki.net/KNavi/" + st)
-	// time.Sleep(1 * time.Second)
-	// resp, err = c.Get("http://kns.cnki.net/kcms/detail/detail.aspx?" + u.RawQuery + "&uid=" + uid)
-	// fmt.Println("http://kns.cnki.net/kcms/detail/detail.aspx?" + u.RawQuery + "&uid=" + uid)
-
-	// doc, err = goquery.NewDocumentFromReader(resp.Body)
-	// if err != nil {
-	// 	panic(err)
-	// }
-	// st = ""
-	// doc.Find("#pdfDown").Each(func(i int, s *goquery.Selection) {
-	// 	a, b := s.Attr("href")
-	// 	if b {
-	// 		st = a
-	// 		fmt.Println(a)
-	// 	}
-	// })
-
-	// fmt.Println("http://kns.cnki.net/" + st)
-
-	// http://kns.cnki.net/
 
 	for i := 0; i < 5; i++ {
 		time.Sleep(2 * time.Second)
@@ -188,16 +152,4 @@ func main() {
 
 	}
 
-}
-
-func SetNewGuid() string {
-	guid := ""
-	for i := 1; i <= 32; i++ {
-		n := math.Floor(rand.Float64() * 16.0)
-		guid += strconv.FormatInt(int64(n), 16)
-		if (i == 8) || (i == 12) || (i == 16) || (i == 20) {
-			guid = guid + "-"
-		}
-	}
-	return guid
 }
