@@ -1,9 +1,9 @@
 package cnki
 
 import (
-	"fmt"
 	"io"
 	"io/ioutil"
+	"log"
 	"math"
 	"math/rand"
 	"net/http"
@@ -41,6 +41,7 @@ type searchOption struct {
 	url         string //搜索结果的地址
 	perPage     int    //每页显示条数
 	order       string //排序方式
+	queryID     int    //搜索id，搜索条件重置后+1
 }
 
 //NewCnki 新建知网
@@ -134,6 +135,14 @@ func (c *Cnki) Search(title, author, from string) []SearchResult {
 	if err != nil {
 		panic(err)
 	}
+
+	tmp := strings.Split(strings.TrimSpace(doc.Find(".countPageMark").Text()), "/")
+	if len(tmp) < 2 {
+		log.Panicln("页码获取失败")
+	} else {
+		c.searchOption.allPage, _ = strconv.Atoi(tmp[1])
+	}
+
 	searchLists := make([]SearchResult, 0)
 	doc.Find("table.GridTableContent tbody tr").Each(func(i int, s *goquery.Selection) {
 		url, ok := s.Find("a.briefDl_D").Attr("href")
@@ -156,22 +165,29 @@ func (c *Cnki) Search(title, author, from string) []SearchResult {
 }
 
 func (c *Cnki) getSearchResult() []SearchResult {
-	resp, err := c.Get(searchResultURL + "QueryID=0&ID=&turnpage=1&tpagemode=L&dbPrefix=SCDB&Fields=&DisplayMode=listmode&PageName=ASP.brief_result_aspx" + "&sorttype=" + c.searchOption.order + "&recordsperpage=" + strconv.Itoa(c.searchOption.perPage) + "&curpage=" + strconv.Itoa(c.searchOption.currentPage))
+	param := url.Values{}
+	param.Add("QueryID", strconv.Itoa(c.searchOption.queryID))
+	if c.searchOption.currentPage > 1 {
+		param.Add("turnpage", "1")
+	}
+	param.Add("tpagemode", "L")
+	param.Add("dbPrefix", "SCDB")
+	param.Add("dbCatalog", "中国学术文献网络出版总库")
+	param.Add("ID", "")
+	param.Add("Fields", "")
+	param.Add("research", "off")
+	param.Add("DisplayMode", "listmode")
+	param.Add("PageName", "ASP.brief_result_aspx")
+	param.Add("sorttype", c.searchOption.order)
+	param.Add("recordsperpage", strconv.Itoa(c.searchOption.perPage))
+	param.Add("curpage", strconv.Itoa(c.searchOption.currentPage))
+	resp, err := c.Get(searchResultURL + param.Encode())
 	if err != nil {
 		panic("搜索结果获取失败: " + err.Error())
 	}
 
 	doc, err := goquery.NewDocumentFromReader(resp.Body)
-	if err != nil {
-		panic(err)
-	}
-	//获取总页数
-	text := doc.Find(".countPageMark").Text()
-	tmp := strings.Split(text, "/")
-	if len(tmp) < 1 {
-		panic("总页数获取失败！")
-	}
-	c.searchOption.allPage, err = strconv.Atoi(tmp[1])
+
 	if err != nil {
 		panic(err)
 	}
@@ -199,8 +215,25 @@ func (c *Cnki) getSearchResult() []SearchResult {
 }
 
 //SearchResultOrder 指定排序方式
-func (c *Cnki) SearchResultOrder() []SearchResult {
-	return c.getSearchResult()
+//0: 主题： 倒序
+//1: 时间：倒序
+//2: 时间：顺序
+//3: 被引：倒序
+//4: 被引：顺序
+//5: 下载：倒序
+//6: 下载：顺序
+func (c *Cnki) SearchResultOrder(order int) {
+	orders := []string{
+		"(FFD,'RANK') desc",
+		"(发表时间,'TIME') desc",
+		"(发表时间,'TIME')",
+		"(被引频次,'INTEGER') desc",
+		"(被引频次,'INTEGER')",
+		"(下载频次,'INTEGER') desc",
+		"(下载频次,'INTEGER')",
+	}
+	c.searchOption.queryID++
+	c.searchOption.order = orders[order]
 }
 
 //SearchPage 搜索结果：指定页码
@@ -214,6 +247,8 @@ func (c *Cnki) SearchPage(page int) []SearchResult {
 func (c *Cnki) SearchNext() []SearchResult {
 	if c.searchOption.currentPage < c.searchOption.allPage {
 		c.searchOption.currentPage++
+	} else {
+		log.Panicln("警告：已经是最后一页了，总页数", c.searchOption.allPage, "当前页码：", c.searchOption.currentPage)
 	}
 	return c.getSearchResult()
 }
@@ -222,6 +257,8 @@ func (c *Cnki) SearchNext() []SearchResult {
 func (c *Cnki) SearchPrev() []SearchResult {
 	if c.searchOption.currentPage > 1 {
 		c.searchOption.currentPage--
+	} else {
+		log.Panicln("警告：已经是第一页了，总页数", c.searchOption.allPage, "当前页码：", c.searchOption.currentPage)
 	}
 	return c.getSearchResult()
 }
@@ -234,12 +271,10 @@ func (c *Cnki) Download(url, dir, filename string) {
 		resp, err := c.Get(url)
 
 		if err != nil {
-			fmt.Println(err)
+			log.Println(err)
 			continue
 		}
-		for k, v := range resp.Header {
-			fmt.Println(k, ":", v)
-		}
+
 		if i == 0 {
 			defer resp.Body.Close()
 		}
@@ -247,11 +282,14 @@ func (c *Cnki) Download(url, dir, filename string) {
 		if resp.Header.Get("Content-Type") == "application/pdf" || resp.Header.Get("Content-Type") == "application/caj" {
 			if resp.Header.Get("Content-Type") == "application/pdf" {
 				filename += ".pdf"
+			} else {
+				filename += ".caj"
 			}
 			if ok, _ := pathExists(dir); !ok {
 				os.MkdirAll(dir, os.ModePerm)
 			}
 			var f *os.File
+			filename = strings.Replace(filename, "/", "_", -1)
 			if ok, _ := pathExists(dir + "/" + filename); !ok {
 				f, err = os.Create(dir + "/" + filename)
 			} else {
@@ -261,10 +299,11 @@ func (c *Cnki) Download(url, dir, filename string) {
 				panic("文件打开或新建失败！" + err.Error())
 			}
 			io.Copy(f, resp.Body)
+			log.Println("下载成功：", filename)
 			break
 		} else {
-			b, _ := ioutil.ReadAll(resp.Body)
-			fmt.Println(string(b))
+			log.Println("下载失败，等待重试")
+			resp.Body.Close()
 		}
 	}
 }
