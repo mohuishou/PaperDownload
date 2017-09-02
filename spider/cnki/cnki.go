@@ -271,7 +271,7 @@ func (c *Cnki) Download(url, dir, filename string) {
 		resp, err := c.Get(url)
 
 		if err != nil {
-			log.Println(err)
+			log.Println(filename, ":", err)
 			continue
 		}
 
